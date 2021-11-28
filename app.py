@@ -23,7 +23,9 @@ submit = st.button("Submit")
 if submit:
     if practice == "A":
         score = practice_A_model(response, encode(applied))
-        st.success("Your adherence score is " + str(score))
+        st.success(f"Your adherence score is: {str(score)} / 4")
+        chart = st.progress((score/4) * 1)
     elif practice == "B":
         score = practice_B_model(response, encode(applied))
-        st.success("Your adherence score is " + str(score))
+        st.success(f"Your adherence score is: {str(score)} / 4")
+        chart = st.progress((score/4) * 1)
