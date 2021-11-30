@@ -1,3 +1,8 @@
+'''
+From Robert Ridley
+https://github.com/robert1ridley/cross-prompt-trait-scoring/blob/main/custom_layers/zeromasking.py
+'''
+
 import tensorflow as tf
 import tensorflow.keras.backend as K
 from tensorflow.keras.layers import Layer
