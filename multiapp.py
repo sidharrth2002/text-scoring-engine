@@ -6,7 +6,6 @@ through an object oriented framework.
 # Import necessary libraries 
 from pages import home, asap
 import streamlit as st
-st.set_page_config(page_title="Text Scoring Engine", page_icon="🚀")
 
 # Define the multipage class to manage the multiple apps in our program 
 class MultiPage: 
@@ -14,10 +13,10 @@ class MultiPage:
 
     def __init__(self):
         self.pages = [
-        # {
-        #     "title": "Home",
-        #     "function": home.app
-        # },
+        {
+            "title": "Home",
+            "function": home.app
+        },
         {
             "title": "ASAP",
             "function": asap.app
