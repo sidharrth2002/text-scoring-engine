@@ -10,10 +10,14 @@ import plotly.graph_objects as go
 from rubrics import report_rubrics
 
 def app():
+
     if "scored" not in st.session_state:
         st.session_state.scored = False
     if "options" not in st.session_state:
         st.session_state.options = False
+    if st.session_state.get('step') is None:
+        st.session_state['step'] = 0
+
     st.title("Industrial Text Scoring Engine")
 
     st.markdown("""
@@ -36,7 +40,7 @@ def app():
 
     submit = text_input_form.form_submit_button(label='Go!', on_click=form_callback_scored)
 
-    if submit or st.session_state.scored:
+    if submit or st.session_state.get('step') == 1:
         if 'Set' in essay_set:
             # using ASAP-AES dataset
             with st.spinner('Working'):
@@ -49,14 +53,18 @@ def app():
         elif 'Practice' in essay_set:
             # using annual reports
             with st.spinner('Working'):
-                score = requests.post(f"{API_URL}/predict-report/", json={
-                                      "text": response, "essay_set": "-".join(essay_set.lower().split())}).json()
-                col1, col2 = st.columns(2)
-                col1.metric("Score", score['eval_score'])
-                col2.markdown(report_rubrics[score['eval_score']])
+                if st.session_state.get('step') == 0:
+                    score = requests.post(f"{API_URL}/predict-report/", json={
+                                        "text": response, "essay_set": "-".join(essay_set.lower().split())}).json()
+                    st.session_state['score'] = score
+                    col1, col2 = st.columns(2)
+                    col1.metric("Score", score['eval_score'])
+                    col2.markdown(report_rubrics[score['eval_score']])
+                    st.session_state['step'] = 1
                 # st.success(f"Your score is: {str(score['eval_score'])} / 4")
                 # chart = st.progress((score['eval_score']/4) * 1)
 
+        score = st.session_state.get('score')
         keywords = score['keywords']
         fig, ax = plt.subplots()
         attentions = requests.get(API_URL + '/word-level-attention').json()
