@@ -7,7 +7,7 @@ Run the following command to install all dependencies:
 pip install -r requirements.txt
 ```
 
-Then run the app:
+Then run both client and server:
 ```
-streamlit run app.py
+sh run.sh
 ```
