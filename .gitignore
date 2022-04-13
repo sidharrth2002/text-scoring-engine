@@ -5,8 +5,8 @@
 /.pnp
 .pnp.js
 
-app/data
-app/controllers/get_features.py
+server/app/data
+server/app/controllers/get_features.py
 client/models
 
 # testing

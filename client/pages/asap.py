@@ -10,6 +10,10 @@ import plotly.graph_objects as go
 from rubrics import report_rubrics
 
 def app():
+    if "scored" not in st.session_state:
+        st.session_state.scored = False
+    if "options" not in st.session_state:
+        st.session_state.options = False
     st.title("Industrial Text Scoring Engine")
 
     st.markdown("""
@@ -18,14 +22,21 @@ def app():
         is not yet production-ready.
     """)
 
-    essay_set = st.radio("Select the essay set", [
-                         "Set 3", "Set 4", "Set 5", "Set 6", "Practice A", "Practice B"])
+    text_input_form = st.form(key='text-input-form')
+    essay_set = text_input_form.radio("Select the essay set", [
+                            "Set 3", "Set 4", "Set 5", "Set 6", "Practice A", "Practice B"])
 
-    response = st.text_area("Enter the relevant text here. You can use Grammarly to help you out.")
+    response = text_input_form.text_area("Enter the relevant text here. You can use Grammarly to help you out.")
 
-    submit = st.button("Submit")
+    def form_callback_scored():
+        st.session_state.scored = True
 
-    if submit:
+    def form_callback_options():
+        st.session_state.options = True
+
+    submit = text_input_form.form_submit_button(label='Go!', on_click=form_callback_scored)
+
+    if submit or st.session_state.scored:
         if 'Set' in essay_set:
             # using ASAP-AES dataset
             with st.spinner('Working'):
@@ -50,18 +61,22 @@ def app():
         fig, ax = plt.subplots()
         attentions = requests.get(API_URL + '/word-level-attention').json()
 
-        key_phrase = st.selectbox(
-            "Select a key phrase to view attention heatmap", keywords)
+        attention_form = st.form(key='attention-form')
 
-        key_phrase_index = keywords.index(key_phrase)
-        # fig = px.imshow(np.array(attentions[0][key_phrase_index])[:len(key_phrase.split()),:len(score['text'].split())], width=500, height=2000)
-        fig = go.Figure(data=go.Heatmap(z=np.array(attentions[0][key_phrase_index])[:len(
-            key_phrase.split()), :len(score['text'].split())], x=score['text'].split(), y=key_phrase.split()))
-        # fig.layout.height = 400
-        # fig.layout.width = 600
-        fig.update(layout_coloraxis_showscale=False)
-        fig.layout.height = 600
-        fig.layout.width = 800
-        st.write(fig)
+        key_phrase = attention_form.selectbox("Select a key phrase to view attention heatmap", keywords, key="select_keyword")
+        form_submit = attention_form.form_submit_button("View Heatmap", on_click=form_callback_options)
+
+        if form_submit:
+            st.write(keywords.index(key_phrase))
+            key_phrase_index = keywords.index(key_phrase)
+            # fig = px.imshow(np.array(attentions[0][key_phrase_index])[:len(key_phrase.split()),:len(score['text'].split())], width=500, height=2000)
+            fig = go.Figure(data=go.Heatmap(z=np.array(attentions[0][key_phrase_index])[:len(
+                key_phrase.split()), :len(score['text'].split())], x=score['text'].split(), y=key_phrase.split()))
+            # fig.layout.height = 400
+            # fig.layout.width = 600
+            fig.update(layout_coloraxis_showscale=False)
+            fig.layout.height = 600
+            fig.layout.width = 800
+            st.write(fig)
     # ax = sns.heatmap(attentions[0][0], cmap='viridis', xticklabels=False, yticklabels=False, ax=ax)
     # st.write(fig)
