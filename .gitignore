@@ -5,9 +5,9 @@
 /.pnp
 .pnp.js
 
-api/app/data
-api/app/controllers/get_features.py
-app/models
+app/data
+app/controllers/get_features.py
+client/models
 
 # testing
 /coverage
