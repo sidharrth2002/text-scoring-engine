@@ -1,5 +1,4 @@
 # Text Scoring Engine
-*Sidharrth Nagappan*
 ### Instructions
 
 Run the following command to install all dependencies:
