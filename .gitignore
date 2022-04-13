@@ -5,6 +5,10 @@
 /.pnp
 .pnp.js
 
+api/app/data
+api/app/controllers/get_features.py
+app/models
+
 # testing
 /coverage
 

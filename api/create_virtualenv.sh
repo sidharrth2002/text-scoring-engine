@@ -1,0 +1,2 @@
+pip3 install --user virtualenv
+virtualenv .venv && source .venv/bin/activate && pip install -r ./requirements/base.txt && python -m spacy download This must be one of spaCy's default languages. See https://spacy.io/usage for a supported list.
