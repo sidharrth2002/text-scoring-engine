@@ -188,7 +188,7 @@ def predict_report(text, set_num):
 
     results = trainer.evaluate()
 
-    results['text'] = data[0]['lemmatized_text']
+    results['text'] = data[0]['answer_lemmatized_text']
     # results['keyword_tokens'] = data[0]['keyword_tokens'].tolist()
     results['keywords'] = get_keywords(set_num)
 

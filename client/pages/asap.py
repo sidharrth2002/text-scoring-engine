@@ -21,8 +21,7 @@ def app():
     st.title("Industrial Text Scoring Engine")
 
     st.markdown("""
-        Here, you can evaluate the scoring framework on either the ASAP-AES scoring dataset. Select an essay prompt
-        below and the system will return the predicted score. Note that the training set is not yet fully extensive and this system
+        Select an essay prompt below and the system will return the predicted score. Note that the training set is not yet fully extensive and this system
         is not yet production-ready.
     """)
 
@@ -44,7 +43,7 @@ def app():
         if 'Set' in essay_set:
             # using ASAP-AES dataset
             with st.spinner('Working'):
-                score = requests.post(f"{API_URL}/predict-asap-aes/", json={
+                score = requests.post(f"{API_URL}/score-essay/", json={
                                       "text": response, "essay_set": "".join(essay_set.lower().split())}).json()
                 st.success(f"Your score is: {str(score['eval_score'])} / 4")
                 chart = st.progress((score['eval_score']/4) * 1)
@@ -54,7 +53,7 @@ def app():
             # using annual reports
             with st.spinner('Working'):
                 if st.session_state.get('step') == 0:
-                    score = requests.post(f"{API_URL}/predict-report/", json={
+                    score = requests.post(f"{API_URL}/score-report/", json={
                                         "text": response, "essay_set": "-".join(essay_set.lower().split())}).json()
                     st.session_state['score'] = score
                     col1, col2 = st.columns(2)
@@ -75,7 +74,6 @@ def app():
         form_submit = attention_form.form_submit_button("View Heatmap", on_click=form_callback_options)
 
         if form_submit:
-            st.write(keywords.index(key_phrase))
             key_phrase_index = keywords.index(key_phrase)
             # fig = px.imshow(np.array(attentions[0][key_phrase_index])[:len(key_phrase.split()),:len(score['text'].split())], width=500, height=2000)
             fig = go.Figure(data=go.Heatmap(z=np.array(attentions[0][key_phrase_index])[:len(
@@ -83,7 +81,7 @@ def app():
             # fig.layout.height = 400
             # fig.layout.width = 600
             fig.update(layout_coloraxis_showscale=False)
-            fig.layout.height = 600
+            fig.layout.height = 500
             fig.layout.width = 800
             st.write(fig)
     # ax = sns.heatmap(attentions[0][0], cmap='viridis', xticklabels=False, yticklabels=False, ax=ax)

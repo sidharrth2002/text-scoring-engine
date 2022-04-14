@@ -29,6 +29,9 @@ from itertools import cycle
 
 from transformers import AutoTokenizer
 
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+
 logger = logging.getLogger(__name__)
 
 CATEGORICAL_ENCODE_TYPE = 'ohe'
@@ -174,6 +177,12 @@ def process_single_text_asap(text, source, features, keywords=[], essay_set='set
 def merge_lists_alternatively(lst1, lst2):
     return [sub[item] for item in range(len(lst2)) for sub in [lst1, lst2]]
 
+def remove_stopwords(text):
+    stop_words = set(stopwords.words('english'))
+    word_tokens = word_tokenize(text)
+    filtered_sentence = [w for w in word_tokens if not w.lower() in stop_words]
+    return ' '.join(filtered_sentence)
+
 def process_single_text_report(text, source, features, keywords=[], essay_set='practice-a'):
     practice = essay_set[-1]
 
@@ -238,6 +247,7 @@ def process_single_text_report(text, source, features, keywords=[], essay_set='p
     data_df = pd.DataFrame(all_features, index=[0])
     data_df['text'] = text
     data_df['lemmatized'] = ' '.join(lemmatize(text))
+    data_df['lemmatized'] = data_df['lemmatized'].apply(remove_stopwords)
     # framework needs at least one categorical feature, but all ASAP-AES features are numerical
 
     categorical_feats, numerical_feats = load_cat_and_num_feats(data_df,
@@ -281,6 +291,7 @@ def process_single_text_report(text, source, features, keywords=[], essay_set='p
     answer_tokens = pad_sequences(answer_tokens, maxlen=max_token_length, padding='post', truncating='post')
 
     answer_lemmatized_tokens = glove_tokenizer.texts_to_sequences(lemmatized_texts_list)
+    answer_lemmatized_text = glove_tokenizer.sequences_to_texts(answer_lemmatized_tokens)
     # answer_lemmatized_tokens = [[i for i in j if i < len(glove_tokenizer.word_index)] for j in answer_lemmatized_tokens]
     answer_lemmatized_tokens = pad_sequences(answer_lemmatized_tokens, maxlen=max_token_length, padding='post', truncating='post')
     # create mask
@@ -297,9 +308,9 @@ def process_single_text_report(text, source, features, keywords=[], essay_set='p
     keyword_mask.masked_fill_(keyword_tokens != 0, 1)
 
     return TorchTabularTextDataset(hf_model_text_input, categorical_feats,
-                                numerical_feats, answer_tokens, answer_mask, keyword_tokens, keyword_mask, [0, 1, 2, 3], data_df, label_list=None, class_weights=None,
+                                numerical_feats, answer_tokens, answer_mask, keyword_tokens, keyword_mask, [0, 1, 2, 3, 4], data_df, label_list=None, class_weights=None,
                                 texts=texts_list,
-                                lemmatized_answer_tokens=answer_lemmatized_tokens, lemmatized_answer_texts=lemmatized_texts_list)
+                                lemmatized_answer_tokens=answer_lemmatized_tokens, lemmatized_answer_texts=lemmatized_texts_list, answer_lemmatized_text=answer_lemmatized_text)
 
 
 def load_data(data_df,

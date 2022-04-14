@@ -3,6 +3,7 @@
 from collections import defaultdict
 from html import entities
 import os
+from urllib import response
 
 from dotenv import load_dotenv, find_dotenv
 from .controllers.asap import calculate_features_asap, predict_asap, predict_report
@@ -50,30 +51,19 @@ def docs_redirect():
 '''
 Document Processing
 '''
-@app.get("/parse-pdf")
-def pdf_parse(path):
-    return parse_pdf(path)
-
-'''
-Feature Generation
-'''
-@app.post("/asap-features")
-def get_features(text: GetFeaturesRequest):
-    return calculate_features_asap(text.text)
-
-@app.post("/predict-asap-aes", response_model=PredictionResponse)
+@app.post("/score-essay", tags=['Text Scoring'], response_model=PredictionResponse, summary='Predict score for a student essay written for one of the prompts in ASAP-AES')
 def predict_asap_call(text: PredictASAPRequest):
     results = predict_asap(text.text, set_num=text.essay_set)
     print(results)
     return results
 
-@app.post("/predict-report", response_model=PredictionResponse)
+@app.post("/score-report", tags=['Text Scoring'], response_model=PredictionResponse, summary='Score annual report based on adherence to chosen regulatory rubrics')
 def predict_report_call(text: PredictASAPRequest):
     results = predict_report(text.text, set_num=text.essay_set)
     print(results)
     return results
 
-@app.get("/word-level-attention")
+@app.get("/word-level-attention", tags=['Text Scoring'], summary='Obtain word-level attention matrix for heatmap generation')
 def get_pickle():
     with open('attentions/attentions.pickle', 'rb') as f:
         final = {}
@@ -81,6 +71,14 @@ def get_pickle():
         for key in attentions:
             final[key] = attentions[key].cpu().detach().numpy().tolist()
         return final['z_key']
+
+@app.post("/asap-features", tags=['Text Scoring'], summary='Aggregate only the features for the ASAP-AES dataset')
+def get_features(text: GetFeaturesRequest):
+    return calculate_features_asap(text.text)
+
+@app.get("/parse-pdf", tags=['Text Scoring'], summary='For PDF parsing')
+def pdf_parse(path):
+    return parse_pdf(path)
 
 @app.post(
     "/named-entities", tags=["NER"]
