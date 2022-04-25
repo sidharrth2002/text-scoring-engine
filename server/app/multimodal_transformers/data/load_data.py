@@ -128,6 +128,17 @@ def process_single_text_asap(text, source, features, keywords=[], essay_set='set
                                                                     numerical_cols_func,
                                                                     CATEGORICAL_ENCODE_TYPE)
 
+        print('reach before')
+        # there must be 1_ and 0_ for each cat feat, this is wrong
+        # categorical_feats = np.array([np.concatenate((categorical_feats[0], categorical_feats[0]))])
+        # if len(categorical_feats[0] == len(features['cat_cols'])):
+        #     # it did not add 1 and 0 for each feature
+        #     # new_cat_feats = np.array(categorical_feats[0])
+        #     reversed_cat_feats = [int(not(i)) for i in categorical_feats[0]]
+        #     categorical_feats = np.array([merge_lists_alternatively(categorical_feats[0], reversed_cat_feats)])
+
+        print('reach after')
+
         numerical_feats = normalize_numerical_feats(numerical_feats, transformer=None)
         agg_func = partial(agg_text_columns_func, EMPTY_TEXT_VALUES, REPLACE_EMPTY_TEXT)
         texts_cols = get_matching_cols(data_df, text_cols_func)
@@ -154,6 +165,7 @@ def process_single_text_asap(text, source, features, keywords=[], essay_set='set
         answer_tokens = pad_sequences(answer_tokens, maxlen=max_token_length, padding='post', truncating='post')
 
         answer_lemmatized_tokens = glove_tokenizer.texts_to_sequences(lemmatized_texts_list)
+        answer_lemmatized_text = glove_tokenizer.sequences_to_texts(answer_lemmatized_tokens)
         # answer_lemmatized_tokens = [[i for i in j if i < len(glove_tokenizer.word_index)] for j in answer_lemmatized_tokens]
         answer_lemmatized_tokens = pad_sequences(answer_lemmatized_tokens, maxlen=max_token_length, padding='post', truncating='post')
         # create mask
@@ -172,7 +184,7 @@ def process_single_text_asap(text, source, features, keywords=[], essay_set='set
         return TorchTabularTextDataset(hf_model_text_input, categorical_feats,
                                     numerical_feats, answer_tokens, answer_mask, keyword_tokens, keyword_mask, [0, 1, 2, 3], data_df, label_list=None, class_weights=None,
                                     texts=texts_list,
-                                    lemmatized_answer_tokens=answer_lemmatized_tokens, lemmatized_answer_texts=lemmatized_texts_list)
+                                    lemmatized_answer_tokens=answer_lemmatized_tokens, lemmatized_answer_texts=lemmatized_texts_list, answer_lemmatized_text=answer_lemmatized_text)
 
 def merge_lists_alternatively(lst1, lst2):
     return [sub[item] for item in range(len(lst2)) for sub in [lst1, lst2]]

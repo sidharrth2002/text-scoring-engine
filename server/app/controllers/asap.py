@@ -23,7 +23,7 @@ models = {}
 nlp = spacy.load('en_core_web_sm')
 
 def initialise_models(folder):
-    essay_sets = ['practice-b']
+    essay_sets = ['set6', 'practice-b']
 
     for essay_set in essay_sets:
         fold = os.listdir(f"{folder}/{essay_set}")[0]
